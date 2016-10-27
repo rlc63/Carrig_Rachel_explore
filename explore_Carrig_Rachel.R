@@ -17,10 +17,14 @@ df = data.frame(diamonds)
 #in our overarching explore function.
 #---
 #1: A frequency table for every categorical and logical variable
-freqtable <- sapply(df, is.logical)
-print(freqtable)
+freqtable <- function(df){
 
-freqdf <- sapply(freqdf, is.c)
+  logicdf <- df[sapply(df, is.logical)]
+  factordf <- df[sapply(df, is.factor)]
+  logicfactordf <- data.frame(logicdf,factordf)
+  return(table(logicfactordf))
+
+}
 
 #---
 #2A: A summary statistics table for each numerical variable  
@@ -47,13 +51,34 @@ if(ncol(numdf) >= 2) {
   x <- combn(colnames(numdf), 2) #finds all combinations of two pairs of column names
   colpairs <- paste(x[1,],x[2,],sep = '-')
   
-  y <- combn(col(numdf), 2)
+  colpairs.lm <- 0
   
-  
-  colpairs.lm <- lm(.^2 ~ .^2, data = numdf)
+  for (i in 1:(length(numdf)-1)) {
+    for (j in (i+1):length(numdf)) {
+      
+  colpairs.lm <- lm(numdf[[i]] ~ numdf[[j]], data = numdf)
   summary(colpairs.lm)$r.squared 
+    }}
 }
 
+  ###GEORGE'S ANSWER#####
+        string=''#set one empty string1 so that we can write in later and because we are operating names therefore we need to set as ''
+        for (i in 1:(length(numdf)-1))#because we exclude the pattern like 'x-x' and we will define (i+1) later therefore we can only take loop from 1 to length(data_num)-1.
+        {#the begin of the for loop
+          string <- c(string, c(paste(colnames(numdf[i]),colnames(numdf[(i+1):length(numdf)]),sep='-')))#we use c(string1,...) so that we can keep the values of last loop, colnames() is function will return variable names correspondingly, we use diamonds_num[(i+1):length(data_num)] to pair each variable(pair variable i and variable((i+1):length(data_num)). The paste() function combines the variable names and separate them with '-'
+        }#the end of the for loop which will return a list contains each pair of variable names
+        string <-string[-1]#delete the initial value
+        square=0#set the initial value of square as 0
+        for (i in 1:(length(numdf)-1))#for loop for i, because we are taking pairs of each variables therefore the for loop can only be defined over 1:length(data_num)-1
+        {#the begin of the for loop of i
+          for (j in (i+1):length(numdf))#the inner loop of j in each i, because we are taking pairs so only consider the variables after i, so the loop of j is defined over (i+1):length(data_num)
+          {#the begin of the j loop
+            square <- c(square, 
+                        summary(lm(numdf[[i]]~numdf[[j]]))$r.squared)#square<-c(square,...) will keep the value of each time of loop. lm(data_num[[i]]~data_num[[j]]) will return a linear model of the ith and jth variable fo data_num. summary()will return a basic information fo this model and r.squared is one of those information. we use $ to extract that value.
+          }#the end of the inner loop of j which will return the r-square value of i and the variables after i.
+        }#the end of the loop of i which will return the r-square value for every pair of numerical variables.
+        square <- square[-1]#delete the initial value
+        rsquare<-data.frame(string, square)#
 
 #colpairs.lm <- lm(carat ~ cut, data=numdf)
 ##summary(colpairs.lm)$r.squared  
@@ -96,11 +121,9 @@ pearsoncoef(df) #here, we test the function
 
 #---
 #PART A
-explore <--function(data.frame){
+explore <- function(data.frame,plotswitch,threshold,binsize){
   
-
-  x = list(summarytable(df),pearsoncoef(df))
-  
+  x = list(freqtable(df),summarytable(df),pearsoncoef(df))
   print(x)
 
 }
