@@ -12,7 +12,7 @@ data("diamonds")
 
 df = data.frame(diamonds)
 
-
+#--------------
 #PART B - please note I've done the second part of the assignment first, since we need these functions to be used
 #in our overarching explore function.
 #---
@@ -29,7 +29,7 @@ freqtable <- function(df){
 }
 freqtable(df) #here, we test the function
 
-#---
+#--------------
 #2A: A summary statistics table for each numerical variable  
 
 summarytable <- function(df){
@@ -45,7 +45,7 @@ summarytable <- function(df){
 }
 summarytable(df) #here, we test the function
 
-#---
+#--------------
 #2B: data frame containing each pair of column names in the 1st column and the associated r-square value in the 2nd column.
 
 rsquarefunc <- function(df){
@@ -54,37 +54,23 @@ numdf <- df[sapply(df, is.numeric)]
 #we create the numdf variable dataframe, taking all columns from the initial df and keeping only the numeric ones
 
   x <- combn(colnames(numdf), 2) #finds all combinations of two pairs of column names
-  colpairs <- paste(x[1,],x[2,],sep = '-')
+  colpairs <- paste(x[1,],x[2,],sep = '~')
+  #we put them together separating them with a ~, so that we can use the next function
   
-  rsquare = 0
-  for (i in 1:(length(numdf)-1)) {
-    for (j in (i+1):length(numdf)) {
-      rsquare <-c(rsquare, summary(lm(numdf[[i]]~numdf[[j]]))$r.squared)
-      rsquare <- rsquare[-1]
-    }
-  }
+  rsquare <- unname(sapply(colpairs, function(l) summary(lm(l, data = numdf))$r.squared))
+  #we create rsquare, which is the a new function taking the linear model of the data from our column pairs and taking the
+  #r squared value of those pairs (which is why we need the ~ above)
+  
+  colpairs <- paste(x[1,],x[2,],sep = '-')
+  #here, we re-make colpairs separating them with a '-' as desired
+  
+  rsquared <- data.frame(colpairs,rsquare) #now, we make a data frame using the column pairs and r square values we made
+  colnames(rsquared) <- c("Variable Pairs", "R-Square") #we rename the columns as desired
 
-  rsquared = data.frame(colpairs,rsquare)
-  return(rsquared)
+  return(rsquared) #this returns the desired dataframe
 }
 
-  ###GEORGE'S ANSWER#####
-        square=0#set the initial value of square as 0
-        for (i in 1:(length(numdf)-1))#for loop for i, because we are taking pairs of each variables therefore the for loop can only be defined over 1:length(data_num)-1
-        {#the begin of the for loop of i
-          for (j in (i+1):length(numdf))#the inner loop of j in each i, because we are taking pairs so only consider the variables after i, so the loop of j is defined over (i+1):length(data_num)
-          {#the begin of the j loop
-            square <- c(square, 
-                        summary(lm(numdf[[i]]~numdf[[j]]))$r.squared)#square<-c(square,...) will keep the value of each time of loop. lm(data_num[[i]]~data_num[[j]]) will return a linear model of the ith and jth variable fo data_num. summary()will return a basic information fo this model and r.squared is one of those information. we use $ to extract that value.
-          }#the end of the inner loop of j which will return the r-square value of i and the variables after i.
-        }#the end of the loop of i which will return the r-square value for every pair of numerical variables.
-        square <- square[-1]#delete the initial value
-        rsquare<-data.frame(string, square)#
-
-#colpairs.lm <- lm(carat ~ cut, data=numdf)
-##summary(colpairs.lm)$r.squared  
-
-
+rsquarefunc(df) #here, we test the function
 #--------------
 #2C: A data framethat contains eachpair of column names in the first column and correlation coefficient (Pearson) 
 #for all coefficients whose absolute value is greater than the correlation threshold in the second column
@@ -119,12 +105,12 @@ pearsoncoef <- function(df){
 pearsoncoef(df) #here, we test the function
 
 
-
-#---
+#--------------
 #PART A
 explore <- function(data.frame,plotswitch,threshold,binsize){
   #our explore function takes the parameters of a dataframe, a plotswitch, a threshhold cutoff, and an optional vector
-  #representing the numbers of bins to use for a histogram
+  #representing the numbers of bins to use for a histogram. since i'm not in groups a,b,c, or d, no defensive 
+  #programming is needed here
   
   x = list(freqtable(df),summarytable(df),rsquarefunc(df),pearsoncoef(df)) #we create a list x here, that takes all the
   #functions we created earlier and puts them in a list
