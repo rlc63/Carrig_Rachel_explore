@@ -12,21 +12,20 @@ data("diamonds")
 
 df = data.frame(diamonds)
 
-explore <--function(data.frame){}
 
-
-#PART B
+#PART B - please note I've done the second part of the assignment first, since we need these functions to be used
+#in our overarching explore function.
 #---
 #1: A frequency table for every categorical and logical variable
-freqdf <- sapply(df, is.logical)
-print(freqdf)
+freqtable <- sapply(df, is.logical)
+print(freqtable)
 
 freqdf <- sapply(freqdf, is.c)
 
 #---
 #2A: A summary statistics table for each numerical variable  
 
-freqtable <- function(df){
+summarytable <- function(df){
   #we create a function freqtable that has parameters of a dataframe and returns the summary statistics of the numerical
   #columns within that dataframe
   
@@ -38,7 +37,7 @@ freqtable <- function(df){
   return(sumstats) #this returns the table we have created
 }
 
-freqtable(df) #here, we test the function
+summarytable(df) #here, we test the function
 #---
 #2B:
 numdf <- df[sapply(df, is.numeric)]
@@ -54,30 +53,6 @@ if(ncol(numdf) >= 2) {
   colpairs.lm <- lm(.^2 ~ .^2, data = numdf)
   summary(colpairs.lm)$r.squared 
 }
-
-
-#-----
-if(ncol(a) >= 2) {
-  b <- combn(colnames(a), 2) #finds all combinations of the name pairs
-  
-  pairs <- paste(b[1,], b[2, ], sep = "-") #makes sure that the column names
-  #are seperated by - using paste function to paste the columns
-  
-  c <- cor(a, method = "pearson")#finds the pearson correlation using the cor 
-  #function and creates of matrix of the values
-  
-  correlation <- c[which(lower.tri(c))] #gets the correclation values of the lower 
-  #triangular matrix since those match the column pairs 
-  
-  newdf <- data.frame(pairs, correlation) #create a new data frame with our pairs 
-  return(newdf)
-  
-}
-else  #print this message if we can't find Pearson correlation
-  print("Pearson Correlation cannot be computted because there are not enough numeric columns")
-}
-corCoef(diamonds)#test case 
-
 
 
 #colpairs.lm <- lm(carat ~ cut, data=numdf)
@@ -120,6 +95,12 @@ pearsoncoef(df) #here, we test the function
 
 
 #---
-x = list(freqtable(df),pearsoncoef(df))
+#PART A
+explore <--function(data.frame){
+  
 
-print(x)
+  x = list(summarytable(df),pearsoncoef(df))
+  
+  print(x)
+
+}
