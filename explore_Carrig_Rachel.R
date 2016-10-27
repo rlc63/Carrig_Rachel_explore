@@ -18,13 +18,16 @@ df = data.frame(diamonds)
 #---
 #1: A frequency table for every categorical and logical variable
 freqtable <- function(df){
+  #here, we create a function where the parameters are the data frame and the output is a frequency table of the logical
+  #and characteristic variables
 
-  logicdf <- df[sapply(df, is.logical)]
-  factordf <- df[sapply(df, is.factor)]
-  logicfactordf <- data.frame(logicdf,factordf)
-  return(table(logicfactordf))
+  logicdf <- df[sapply(df, is.logical)] #first, we create a dataframe with the logical varaibles
+  factordf <- df[sapply(df, is.factor)] #then, we create a dataframe with the categorical variables
+  logicfactordf <- data.frame(logicdf,factordf) #we then combine those two dataframes into one dataframe
+  return(table(logicfactordf)) #we return a frequency table of the new dataframe we created
 
 }
+freqtable(df) #here, we test the function
 
 #---
 #2A: A summary statistics table for each numerical variable  
@@ -40,34 +43,32 @@ summarytable <- function(df){
   
   return(sumstats) #this returns the table we have created
 }
-
 summarytable(df) #here, we test the function
+
 #---
-#2B:
+#2B: data frame containing each pair of column names in the 1st column and the associated r-square value in the 2nd column.
+
+rsquarefunc <- function(df){
+
 numdf <- df[sapply(df, is.numeric)]
 #we create the numdf variable dataframe, taking all columns from the initial df and keeping only the numeric ones
 
-if(ncol(numdf) >= 2) {
   x <- combn(colnames(numdf), 2) #finds all combinations of two pairs of column names
   colpairs <- paste(x[1,],x[2,],sep = '-')
   
-  colpairs.lm <- 0
-  
+  rsquare = 0
   for (i in 1:(length(numdf)-1)) {
     for (j in (i+1):length(numdf)) {
-      
-  colpairs.lm <- lm(numdf[[i]] ~ numdf[[j]], data = numdf)
-  summary(colpairs.lm)$r.squared 
-    }}
+      rsquare <-c(rsquare, summary(lm(numdf[[i]]~numdf[[j]]))$r.squared)
+      rsquare <- rsquare[-1]
+    }
+  }
+
+  rsquared = data.frame(colpairs,rsquare)
+  return(rsquared)
 }
 
   ###GEORGE'S ANSWER#####
-        string=''#set one empty string1 so that we can write in later and because we are operating names therefore we need to set as ''
-        for (i in 1:(length(numdf)-1))#because we exclude the pattern like 'x-x' and we will define (i+1) later therefore we can only take loop from 1 to length(data_num)-1.
-        {#the begin of the for loop
-          string <- c(string, c(paste(colnames(numdf[i]),colnames(numdf[(i+1):length(numdf)]),sep='-')))#we use c(string1,...) so that we can keep the values of last loop, colnames() is function will return variable names correspondingly, we use diamonds_num[(i+1):length(data_num)] to pair each variable(pair variable i and variable((i+1):length(data_num)). The paste() function combines the variable names and separate them with '-'
-        }#the end of the for loop which will return a list contains each pair of variable names
-        string <-string[-1]#delete the initial value
         square=0#set the initial value of square as 0
         for (i in 1:(length(numdf)-1))#for loop for i, because we are taking pairs of each variables therefore the for loop can only be defined over 1:length(data_num)-1
         {#the begin of the for loop of i
@@ -122,8 +123,13 @@ pearsoncoef(df) #here, we test the function
 #---
 #PART A
 explore <- function(data.frame,plotswitch,threshold,binsize){
+  #our explore function takes the parameters of a dataframe, a plotswitch, a threshhold cutoff, and an optional vector
+  #representing the numbers of bins to use for a histogram
   
-  x = list(freqtable(df),summarytable(df),pearsoncoef(df))
-  print(x)
+  x = list(freqtable(df),summarytable(df),rsquarefunc(df),pearsoncoef(df)) #we create a list x here, that takes all the
+  #functions we created earlier and puts them in a list
+  
+  return(x) #we return the list we created
 
 }
+explore(df) #here, we test the function
